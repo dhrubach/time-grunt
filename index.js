@@ -5,7 +5,6 @@ var hooker = require('hooker');
 var dateTime = require('date-time');
 var prettyMs = require('pretty-ms');
 var numberIsNan = require('number-is-nan');
-var barChar = require('figures').square;
 var argv = process.argv.slice(2);
 var write = process.stdout.write.bind(process.stdout);
 
@@ -14,6 +13,7 @@ function log(str) {
 }
 
 module.exports = function (grunt, cb) {
+	var barChar = process.platform === 'win32' ? '■' : '▇';
 	var now = new Date();
 	var startTimePretty = dateTime();
 	var startTime = now.getTime();
