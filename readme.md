@@ -24,6 +24,26 @@ module.exports = function (grunt) {
 }
 ```
 
+## Optional configuration to change display colors
+
+```
+	grunt.initConfig({
+		time: {
+			options: {
+				header: 'blue',	//defines output header color
+				task: 'gray', //defines left half task name color 
+				bar: 'red', //defines right half bar color
+				footer: 'green' //defines footer color
+			}
+		}
+	});
+```
+
+Defaults Styles
+	* header : yellow & bold
+	* task name : blue
+	* bar : blue
+	* footer : green & bold
 
 ## Optional callback
 

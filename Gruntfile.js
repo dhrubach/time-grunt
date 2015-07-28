@@ -10,6 +10,17 @@ module.exports = function (grunt) {
 		}
 	});
 
+	grunt.initConfig({
+		time: {
+			options: {
+				header: 'blue',
+				task: 'gray',
+				bar: 'red',
+				footer: 'green'
+			}
+		}
+	});
+
 	require('./')(grunt);
 
 	grunt.registerTask('test', function () {

@@ -20,6 +20,15 @@ module.exports = function (grunt, cb) {
 	var prevTime = startTime;
 	var prevTaskName = 'loading tasks';
 	var tableData = [];
+	var styleOptions = grunt.config('time')
+			? (grunt.config('time').options || {})
+			: {};
+	var defaultDisplayStyle = {
+		'header': chalk.yellow.bold,
+		'task': chalk.blue,
+		'bar': chalk.blue,
+		'footer': chalk.green.bold
+	};
 
 	if (argv.indexOf('--help') !== -1 ||
 		argv.indexOf('-h') !== -1 ||
@@ -59,6 +68,26 @@ module.exports = function (grunt, cb) {
 		prevTime = Date.now();
 		prevTaskName = name;
 	});
+
+	function formatInputStyle(section) {
+		//avoid use of 'slice' as it prevents V8 customizations
+		var args = new Array(arguments.length);
+		for(var i = 1; i < arguments.length; i++) {
+			args[i] = arguments[i];
+		}
+
+		if(Object.keys(styleOptions).indexOf(section) === -1) {
+			return defaultDisplayStyle[section](args.join(''));
+		}
+
+		var parsedStyle = Object.keys(chalk.styles).filter(function(style) {
+			return (style === styleOptions[section]);
+		});
+
+		return parsedStyle ?
+				chalk[parsedStyle.join('')](args.join(''))
+				: defaultDisplayStyle[section](args.join(''));
+	}
 
 	function formatTable(tableData) {
 		var totalTime = Date.now() - startTime;
@@ -111,11 +140,13 @@ module.exports = function (grunt, cb) {
 		var tableDataProcessed = tableData.map(function (row) {
 			var avg = row[1] / totalTime;
 
-			if (numberIsNan(avg) ||  (avg < 0.01 && !grunt.option('verbose'))) {
+			if (numberIsNan(avg) || (avg < 0.01 && !grunt.option('verbose'))) {
 				return;
 			}
 
-			return [shorten(row[0]), chalk.cyan(prettyMs(row[1])), chalk.cyan(createBar(avg))];
+			return [formatInputStyle('task', shorten(row[0])),
+					formatInputStyle('bar', prettyMs(row[1])),
+					formatInputStyle('bar', createBar(avg))];
 		}).reduce(function (acc, row) {
 			if (row) {
 				acc.push(row);
@@ -125,7 +156,7 @@ module.exports = function (grunt, cb) {
 			return acc;
 		}, []);
 
-		tableDataProcessed.push([chalk.bold.yellow('Total', prettyMs(totalTime))]);
+		tableDataProcessed.push([formatInputStyle('footer', 'Total : ', prettyMs(totalTime))]);
 
 		return table(tableDataProcessed, {
 			align: ['l', 'r', 'l'],
@@ -152,7 +183,7 @@ module.exports = function (grunt, cb) {
 		}
 
 		// `grunt.log.header` should be unhooked above, but in some cases it's not
-		log('\n\n' + chalk.underline.bold.yellow('Execution Time') + chalk.yellow(' (' + startTimePretty + ')'));
+		log('\n\n' + formatInputStyle('header', 'Execution Time ( ', startTimePretty, ' )'));
 		log(formatTable(tableData) + '\n');
 
 		if (cb) {
